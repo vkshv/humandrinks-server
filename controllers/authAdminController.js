@@ -10,12 +10,12 @@ exports.signIn = async (req, res) => {
     
     const admin = response.data.data.find(u => u.username === username && u.password === password)
     if (!admin) {
-      return res.status(STATUS_CODE.NOT_FOUND).json({ message: STATUS_TEXT[STATUS_CODE.NOT_FOUND] + 'fffff' }) // 404 for security
+      return res.status(STATUS_CODE.NOT_FOUND).json({ message: STATUS_TEXT[STATUS_CODE.NOT_FOUND] }) // 404 for security
     }
 
     const token = jwt.sign({ id: admin.id, username: admin.username }, JWT_ADMIN_SECRET, { expiresIn: '8h' })
     res.json({ token, id: admin.id, username: admin.username })
   } catch (error) {
-    return res.status(STATUS_CODE.NOT_FOUND).json({ message: STATUS_TEXT[STATUS_CODE.NOT_FOUND] + 'fff' }) // 404 for security
+    return res.status(STATUS_CODE.NOT_FOUND).json({ message: STATUS_TEXT[STATUS_CODE.NOT_FOUND] }) // 404 for security
   }
 }
