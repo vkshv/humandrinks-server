@@ -3,20 +3,20 @@ const fs = require('fs')
 const http = require('../services/http/strapiClient')
 const { STATUS_CODE, STATUS_TEXT } = require('../const/http')
 
-exports.getFoodItems = async (req, res) => {
+exports.getEventItems = async (req, res) => {
   try {
-    const response = await http.get('/foods', { params: { populate: '*' } })
+    const response = await http.get('/events', { params: { populate: '*' } })
     res.json(response.data)
   } catch (error) {
     res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
   }
 }
 
-exports.createFoodItem = async (req, res) => {
+exports.createEventItem = async (req, res) => {
   try {
     if (req.files?.length) {
       const formData = new FormData()
-      formData.append('ref', 'foods')
+      formData.append('ref', 'events')
       formData.append('field', 'picture')
       formData.append('files', fs.createReadStream(req.files[0].path), req.files[0].originalname)
       const responseUpload = await http.post('/upload', formData)
@@ -26,11 +26,11 @@ exports.createFoodItem = async (req, res) => {
         ...JSON.parse(req.body.data),
         picture: responseUpload.data[0].id
       } }
-      const response = await http.post('/foods', data)
+      const response = await http.post('/events', data)
       res.json(response.data)
     } else {
       const data = { data: JSON.parse(req.body.data) }
-      const response = await http.post('/foods', data)
+      const response = await http.post('/events', data)
       res.json(response.data)
     }
   } catch (error) {
@@ -38,11 +38,11 @@ exports.createFoodItem = async (req, res) => {
   }
 }
 
-exports.updateFoodItem = async (req, res) => {
+exports.updateEventItem = async (req, res) => {
   try {
     if (req.files?.length) {
       const formData = new FormData()
-      formData.append('ref', 'foods')
+      formData.append('ref', 'events')
       formData.append('refId', req.params.id)
       formData.append('field', 'picture')
       formData.append('files', fs.createReadStream(req.files[0].path), req.files[0].originalname)
@@ -53,11 +53,11 @@ exports.updateFoodItem = async (req, res) => {
         ...JSON.parse(req.body.data),
         picture: responseUpload.data[0].id
       } }
-      const response = await http.put(`/foods/${req.params.id}`, data)
+      const response = await http.put(`/events/${req.params.id}`, data)
       res.json(response.data)
     } else {
       const data = { data: JSON.parse(req.body.data) }
-      const response = await http.put(`/foods/${req.params.id}`, data)
+      const response = await http.put(`/events/${req.params.id}`, data)
       res.json(response.data)
     }
   } catch (error) {
@@ -65,18 +65,18 @@ exports.updateFoodItem = async (req, res) => {
   }
 }
 
-exports.deleteFoodItem = async (req, res) => {
+exports.deleteEventItem = async (req, res) => {
   try {
-    const response = await http.delete(`/foods/${req.params.id}`)
+    const response = await http.delete(`/events/${req.params.id}`)
     res.json({})
   } catch (error) {
     res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
   }
 }
 
-exports.getFoodCategories = async (req, res) => {
+exports.getEventCategories = async (req, res) => {
   try {
-    const response = await http.get('/food-categories')
+    const response = await http.get('/event-categories')
     res.json(response.data)
   } catch (error) {
     res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })

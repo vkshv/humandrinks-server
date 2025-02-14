@@ -10,6 +10,9 @@ app.use(express.json())
 
 app.use('/api/admin/auth', require('./routes/authAdminRoutes'))
 app.use('/api/admin/food', require('./routes/foodAdminRoutes'))
+app.use('/api/admin/drink', require('./routes/drinkAdminRoutes'))
+app.use('/api/admin/event', require('./routes/eventAdminRoutes'))
+app.use('/api/admin/merch', require('./routes/merchAdminRoutes'))
 
 app.use((req, res) => {
   res.status(STATUS_CODE.NOT_FOUND).json({ message: STATUS_TEXT[STATUS_CODE.NOT_FOUND] })
