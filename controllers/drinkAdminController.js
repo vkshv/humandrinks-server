@@ -6,9 +6,9 @@ const { STATUS_CODE, STATUS_TEXT } = require('../const/http')
 exports.getDrinkItems = async (req, res) => {
   try {
     const response = await http.get('/drinks', { params: { populate: '*' } })
-    res.json(response.data)
+    return res.json(response.data)
   } catch (error) {
-    res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
   }
 }
 
@@ -27,14 +27,14 @@ exports.createDrinkItem = async (req, res) => {
         picture: responseUpload.data[0].id
       } }
       const response = await http.post('/drinks', data)
-      res.json(response.data)
+      return res.json(response.data)
     } else {
       const data = { data: JSON.parse(req.body.data) }
       const response = await http.post('/drinks', data)
-      res.json(response.data)
+      return res.json(response.data)
     }
   } catch (error) {
-    res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
   }
 }
 
@@ -54,31 +54,31 @@ exports.updateDrinkItem = async (req, res) => {
         picture: responseUpload.data[0].id
       } }
       const response = await http.put(`/drinks/${req.params.id}`, data)
-      res.json(response.data)
+      return res.json(response.data)
     } else {
       const data = { data: JSON.parse(req.body.data) }
       const response = await http.put(`/drinks/${req.params.id}`, data)
-      res.json(response.data)
+      return res.json(response.data)
     }
   } catch (error) {
-    res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
   }
 }
 
 exports.deleteDrinkItem = async (req, res) => {
   try {
     const response = await http.delete(`/drinks/${req.params.id}`)
-    res.json({})
+    return res.json({})
   } catch (error) {
-    res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
   }
 }
 
 exports.getDrinkCategories = async (req, res) => {
   try {
     const response = await http.get('/drink-categories')
-    res.json(response.data)
+    return res.json(response.data)
   } catch (error) {
-    res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
   }
 }

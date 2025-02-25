@@ -1,4 +1,4 @@
-export const STATUS_CODE = Object.freeze({
+const STATUS_CODE = Object.freeze({
   CONTINUE: 100,
   SWITCHING_PROTOCOLS: 101,
   PROCESSING: 102,
@@ -62,7 +62,7 @@ export const STATUS_CODE = Object.freeze({
   NETWORK_AUTHENTICATION_REQUIRED: 511
 })
 
-export const STATUS_TEXT = Object.freeze({
+const STATUS_TEXT = Object.freeze({
   [STATUS_CODE.CONTINUE]: 'Continue',
   [STATUS_CODE.SWITCHING_PROTOCOLS]: 'Switching Protocols',
   [STATUS_CODE.PROCESSING]: 'Processing',
@@ -125,3 +125,8 @@ export const STATUS_TEXT = Object.freeze({
   [STATUS_CODE.NOT_EXTENDED]: 'Not Extended',
   [STATUS_CODE.NETWORK_AUTHENTICATION_REQUIRED]: 'Network Authentication Required'
 })
+
+module.exports = {
+  STATUS_CODE,
+  STATUS_TEXT
+}

@@ -14,7 +14,7 @@ exports.signIn = async (req, res) => {
     }
 
     const token = jwt.sign({ id: admin.id, username: admin.username }, JWT_ADMIN_SECRET, { expiresIn: '8h' })
-    res.json({ token, id: admin.id, username: admin.username })
+    return res.json({ token, id: admin.id, username: admin.username })
   } catch (error) {
     return res.status(STATUS_CODE.NOT_FOUND).json({ message: STATUS_TEXT[STATUS_CODE.NOT_FOUND] }) // 404 for security
   }

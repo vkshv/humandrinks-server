@@ -5,5 +5,6 @@ module.exports = {
   STRAPI_API_TOKEN: process.env.STRAPI_API_TOKEN,
   JWT_ADMIN_SECRET: process.env.JWT_ADMIN_SECRET,
   JWT_USER_SECRET: process.env.JWT_USER_SECRET,
+  JWT_USER_AUTH_SECRET: process.env.JWT_USER_AUTH_SECRET,
   BOT_TOKEN: process.env.BOT_TOKEN
 }

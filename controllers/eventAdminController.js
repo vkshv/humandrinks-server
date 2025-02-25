@@ -6,9 +6,9 @@ const { STATUS_CODE, STATUS_TEXT } = require('../const/http')
 exports.getEventItems = async (req, res) => {
   try {
     const response = await http.get('/events', { params: { populate: '*' } })
-    res.json(response.data)
+    return res.json(response.data)
   } catch (error) {
-    res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
   }
 }
 
@@ -27,14 +27,14 @@ exports.createEventItem = async (req, res) => {
         picture: responseUpload.data[0].id
       } }
       const response = await http.post('/events', data)
-      res.json(response.data)
+      return res.json(response.data)
     } else {
       const data = { data: JSON.parse(req.body.data) }
       const response = await http.post('/events', data)
-      res.json(response.data)
+      return res.json(response.data)
     }
   } catch (error) {
-    res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
   }
 }
 
@@ -54,31 +54,31 @@ exports.updateEventItem = async (req, res) => {
         picture: responseUpload.data[0].id
       } }
       const response = await http.put(`/events/${req.params.id}`, data)
-      res.json(response.data)
+      return res.json(response.data)
     } else {
       const data = { data: JSON.parse(req.body.data) }
       const response = await http.put(`/events/${req.params.id}`, data)
-      res.json(response.data)
+      return res.json(response.data)
     }
   } catch (error) {
-    res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
   }
 }
 
 exports.deleteEventItem = async (req, res) => {
   try {
     const response = await http.delete(`/events/${req.params.id}`)
-    res.json({})
+    return res.json({})
   } catch (error) {
-    res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
   }
 }
 
 exports.getEventCategories = async (req, res) => {
   try {
     const response = await http.get('/event-categories')
-    res.json(response.data)
+    return res.json(response.data)
   } catch (error) {
-    res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
   }
 }
