@@ -16,6 +16,7 @@ app.use('/api/admin/merch', require('./routes/merchAdminRoutes'))
 app.use('/api/admin/visitor', require('./routes/visitorAdminRoutes'))
 
 app.use('/api/auth', require('./routes/authUserRoutes'))
+app.use('/api/content', require('./routes/contentUserRoutes'))
 
 app.use((req, res) => {
   res.status(STATUS_CODE.NOT_FOUND).json({ message: STATUS_TEXT[STATUS_CODE.NOT_FOUND] })

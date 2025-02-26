@@ -111,7 +111,7 @@ exports.registerUser = async (req, res) => {
   const phone = req.body.phone
   const birth = req.body.birth
   const telegramId = req.user.id
-  const data = { name, surname, patronymic, address, phone, birth, telegramId }
+  const data = { name, surname, patronymic, address, phone, birth, telegramId, bonus: 0 }
 
   if (!name || !surname || !patronymic || !address || !phone || !birth) {
     return res.status(STATUS_CODE.BAD_REQUEST).json({ message: STATUS_TEXT[STATUS_CODE.BAD_REQUEST] })
