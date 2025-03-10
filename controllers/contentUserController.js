@@ -5,7 +5,7 @@ exports.getFoodItems = async (req, res) => {
   try {
     const response = await http.get('/foods', { params: { populate: '*' } })
     return res.json(response.data.data.map((e) => {
-      const { documentId, createdAt, updatedAt, publishedAt, picture, category, ...data } = e
+      const { createdAt, updatedAt, publishedAt, picture, category, ...data } = e
       return {
         ...data,
         picture: picture.url,
@@ -30,7 +30,7 @@ exports.getDrinkItems = async (req, res) => {
   try {
     const response = await http.get('/drinks', { params: { populate: '*' } })
     return res.json(response.data.data.map((e) => {
-      const { documentId, createdAt, updatedAt, publishedAt, picture, category, ...data } = e
+      const { createdAt, updatedAt, publishedAt, picture, category, ...data } = e
       return {
         ...data,
         picture: picture.url,
@@ -55,7 +55,7 @@ exports.getEventItems = async (req, res) => {
   try {
     const response = await http.get('/events', { params: { populate: '*' } })
     return res.json(response.data.data.map((e) => {
-      const { documentId, createdAt, updatedAt, publishedAt, picture, category, ...data } = e
+      const { createdAt, updatedAt, publishedAt, picture, category, ...data } = e
       return {
         ...data,
         picture: picture.url,
@@ -80,7 +80,7 @@ exports.getMerchItems = async (req, res) => {
   try {
     const response = await http.get('/merches', { params: { populate: '*' } })
     return res.json(response.data.data.map((e) => {
-      const { documentId, createdAt, updatedAt, publishedAt, picture, ...data } = e
+      const { createdAt, updatedAt, publishedAt, picture, ...data } = e
       return {
         ...data,
         picture: picture.url
