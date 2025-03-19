@@ -8,8 +8,8 @@ exports.getFoodItems = async (req, res) => {
       const { createdAt, updatedAt, publishedAt, picture, category, ...data } = e
       return {
         ...data,
-        picture: picture.url,
-        category: category.name
+        picture: picture?.url,
+        category: category?.name
       }
     }))
   } catch (error) {
@@ -33,8 +33,8 @@ exports.getDrinkItems = async (req, res) => {
       const { createdAt, updatedAt, publishedAt, picture, category, ...data } = e
       return {
         ...data,
-        picture: picture.url,
-        category: category.name
+        picture: picture?.url,
+        category: category?.name
       }
     }))
   } catch (error) {
@@ -58,8 +58,8 @@ exports.getEventItems = async (req, res) => {
       const { createdAt, updatedAt, publishedAt, picture, category, ...data } = e
       return {
         ...data,
-        picture: picture.url,
-        category: category.name
+        picture: picture?.url,
+        category: category?.name
       }
     }))
   } catch (error) {
@@ -83,7 +83,7 @@ exports.getMerchItems = async (req, res) => {
       const { createdAt, updatedAt, publishedAt, picture, ...data } = e
       return {
         ...data,
-        picture: picture.url
+        picture: picture?.url
       }
     }))
   } catch (error) {
