@@ -111,7 +111,18 @@ exports.registerUser = async (req, res) => {
   const phone = req.body.phone
   const birth = req.body.birth
   const telegramId = req.user.id
+  const promocode = req.body.promocode
   const data = { name, surname, patronymic, address, phone, birth, telegramId, bonus: 0 }
+
+  if (promocode) {
+    try {
+      const response_promo = await http.get('/promo?fields=Promocodes')
+      const _promo = response_promo.data.data.Promocodes.find((e) => e.code === promocode)
+      if (_promo && _promo.register) {
+        data.bonus = _promo.bonus
+      }
+    } catch (error) {}
+  }
 
   if (!name || !surname || !patronymic || !address || !phone || !birth) {
     return res.status(STATUS_CODE.BAD_REQUEST).json({ message: STATUS_TEXT[STATUS_CODE.BAD_REQUEST] })
@@ -129,4 +140,19 @@ exports.registerUser = async (req, res) => {
   } catch (error) {
     return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: STATUS_TEXT[STATUS_CODE.INTERNAL_SERVER_ERROR] })
   }
+}
+
+exports.checkRegPromocode = async (req, res) => {
+  const promocode = req.query.promocode
+  if (promocode) {
+    try {
+      const response = await http.get('/promo?fields=Promocodes')
+      const _promo = response.data.data.Promocodes.find((e) => e.code === promocode)
+      if (_promo && _promo.register) return res.json(_promo)
+      return res.status(STATUS_CODE.NOT_FOUND).json({ message: STATUS_TEXT[STATUS_CODE.NOT_FOUND] })
+    } catch (error) {
+      return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: STATUS_TEXT[STATUS_CODE.INTERNAL_SERVER_ERROR] })
+    }
+  }
+  return res.status(STATUS_CODE.BAD_REQUEST).json({ message: STATUS_TEXT[STATUS_CODE.BAD_REQUEST] })
 }
