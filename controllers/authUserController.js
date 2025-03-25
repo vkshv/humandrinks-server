@@ -156,3 +156,33 @@ exports.checkRegPromocode = async (req, res) => {
   }
   return res.status(STATUS_CODE.BAD_REQUEST).json({ message: STATUS_TEXT[STATUS_CODE.BAD_REQUEST] })
 }
+
+exports.redeemPromocode = async (req, res) => {
+  const req_promocode = req.body.promocode
+  const telegramId = req.user.id
+  try {
+    const response_promocodes = await http.get('/promo?fields=Promocodes')
+    const current_promo = response_promocodes.data.data.Promocodes.find((e) => e.code === req_promocode)
+    if (!current_promo || current_promo.register) return res.status(STATUS_CODE.NOT_FOUND).json({ message: STATUS_TEXT[STATUS_CODE.NOT_FOUND] })
+    // промокод валиден
+
+    const response_user = await http.get(`/visitors?filters[telegramId]=${telegramId}`)
+    if (!response_user.data.data.length) return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: STATUS_TEXT[STATUS_CODE.INTERNAL_SERVER_ERROR] })
+    const user = response_user.data.data[0]
+    // пользователь найден
+
+    if (user.redeemedPromocodes?.includes(current_promo.code)) return res.status(STATUS_CODE.BAD_REQUEST).json({ message: STATUS_TEXT[STATUS_CODE.BAD_REQUEST] })
+    // промокод еще не был погашен
+
+    const new_data = { redeemedPromocodes: [...(user.redeemedPromocodes ?? []), current_promo.code] }
+    if (current_promo.bonus) {
+      new_data.bonus = user.bonus + current_promo.bonus
+    }
+    // payload для PUT-запроса сформирован
+
+    await http.put(`/visitors/${user.documentId}`, { data: new_data })
+    return res.json(current_promo)
+  } catch (error) {
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: STATUS_TEXT[STATUS_CODE.INTERNAL_SERVER_ERROR] })
+  }
+}
