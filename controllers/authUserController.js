@@ -17,12 +17,17 @@ function verifyTelegramAuth(data) {
     .join('\n')
 
   const computedHash = crypto.createHmac('sha256', secretKey).update(sortedParams).digest('hex')
+  console.log('data', data)
+  console.log('BOT_TOKEN', BOT_TOKEN)
+  console.log('hash', hash)
+  console.log('computedHash', computedHash)
 
   return computedHash === hash
 }
 
 exports.authenticateUser = async (req, res) => {
   try {
+    console.log('req.body', req.body)
     const initData = req.body.initData
     if (!initData || !verifyTelegramAuth(initData)) {
       return res.status(STATUS_CODE.BAD_REQUEST).json({ message: STATUS_TEXT[STATUS_CODE.BAD_REQUEST] })
