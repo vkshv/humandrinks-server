@@ -9,6 +9,7 @@ router.post('/send-code', authUserController.sendCode)
 router.post('/validate-code', authUserController.validateCode)
 router.post('/register', authUserAuthMiddleware, authUserController.registerUser)
 router.get('/check-reg-promocode', authUserAuthMiddleware, authUserController.checkRegPromocode)
+router.post('/suggest-address', authUserAuthMiddleware, authUserController.suggestAddress)
 router.post('/redeem-promocode', authUserMiddleware, authUserController.redeemPromocode)
 
 module.exports = router

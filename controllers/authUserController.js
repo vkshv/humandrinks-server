@@ -4,6 +4,8 @@ const { JWT_USER_SECRET, JWT_USER_AUTH_SECRET, BOT_TOKEN } = require('../config/
 const { STATUS_CODE, STATUS_TEXT } = require('../const/http')
 const { setCode, getCode } = require('../stores/authCodes')
 const http = require('../services/http/strapiClient')
+const smsGateway = require('../services/http/smsGatewayClient')
+const addressSuggestion = require('../services/http/addressSuggestionClient')
 
 function verifyTelegramAuth(data) {
   const secretKey = crypto.createHmac('sha256', 'WebAppData').update(BOT_TOKEN).digest()
@@ -17,17 +19,12 @@ function verifyTelegramAuth(data) {
     .join('\n')
 
   const computedHash = crypto.createHmac('sha256', secretKey).update(sortedParams).digest('hex')
-  console.log('data', data)
-  console.log('BOT_TOKEN', BOT_TOKEN)
-  console.log('hash', hash)
-  console.log('computedHash', computedHash)
 
   return computedHash === hash
 }
 
 exports.authenticateUser = async (req, res) => {
   try {
-    console.log('req.body', req.body)
     const initData = req.body.initData
     if (!initData || !verifyTelegramAuth(initData)) {
       return res.status(STATUS_CODE.BAD_REQUEST).json({ message: STATUS_TEXT[STATUS_CODE.BAD_REQUEST] })
@@ -61,10 +58,51 @@ exports.sendCode = async (req, res) => {
   if (!/^\+7 \(\d\d\d\) \d\d\d \d\d \d\d$/.test(phone)) {
     return res.status(STATUS_CODE.BAD_REQUEST).json({ message: STATUS_TEXT[STATUS_CODE.BAD_REQUEST] })
   }
+  const prepared_phone = phone.split('').filter((e) => ['1','2','3','4','5','6','7','8','9','0'].includes(e)).join('')
+
+  const prev_code = getCode(prepared_phone)
+  if (prev_code && prev_code.canBeResent === false) {
+    return res.status(STATUS_CODE.TOO_MANY_REQUESTS).json({ message: STATUS_TEXT[STATUS_CODE.TOO_MANY_REQUESTS] })
+  }
+  let code
+  if (prev_code) {
+    code = prev_code?.code
+  } else {
+    code = crypto.randomInt(1000, 9999)
+    setCode(prepared_phone, code.toString())
+  }
+
   // Проверка стоимости СМС
-  const code = crypto.randomInt(1000, 1001)
+  try {
+    const response_cost = await smsGateway.post('/sms/cost', {}, {
+      params: {
+        to: prepared_phone,
+        msg: code,
+        json: 1
+      }
+    })
+    if (response_cost.data.total_cost > 10) {
+      return res.status(STATUS_CODE.FORBIDDEN).json({ message: STATUS_TEXT[STATUS_CODE.FORBIDDEN] })
+    }
+    if (response_cost.data.total_cost === undefined) {
+      return res.status(STATUS_CODE.FORBIDDEN).json({ message: STATUS_TEXT[STATUS_CODE.FORBIDDEN] })
+    }
+  } catch (error) {
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: STATUS_TEXT[STATUS_CODE.INTERNAL_SERVER_ERROR] })
+  }
+
   // Отправка СМС
-  setCode(phone, code.toString())
+  try {
+    const response_send = await smsGateway.post('/sms/send', {}, {
+      params: {
+        to: prepared_phone,
+        msg: code,
+        json: 1
+      }
+    })
+  } catch (error) {
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: STATUS_TEXT[STATUS_CODE.INTERNAL_SERVER_ERROR] })
+  }
   return res.json({})
 }
 
@@ -80,12 +118,13 @@ exports.validateCode = async (req, res) => {
   ) {
     return res.status(STATUS_CODE.BAD_REQUEST).json({ message: STATUS_TEXT[STATUS_CODE.BAD_REQUEST] })
   }
-  if (getCode(phone) === code) {
+  const prepared_phone = phone.split('').filter((e) => ['1','2','3','4','5','6','7','8','9','0'].includes(e)).join('')
+  if (getCode(prepared_phone)?.code === code) {
     const params = new URLSearchParams(initData)
     const user = JSON.parse(params.get('user'))
-    const token = jwt.sign({ id: user.id, username: user.username }, JWT_USER_AUTH_SECRET, { expiresIn: '8h' })
+    const token = jwt.sign({ id: user.id, phone: prepared_phone }, JWT_USER_AUTH_SECRET, { expiresIn: '8h' })
     try {
-      const response = await http.get(`/visitors?filters[phone]=${encodeURIComponent(phone)}`)
+      const response = await http.get(`/visitors?filters[phone]=${encodeURIComponent(prepared_phone)}`)
       if (response.data.data.length) {
         const userRegData = response.data.data[0]
         return res.json({
@@ -113,7 +152,7 @@ exports.registerUser = async (req, res) => {
   const surname = req.body.surname
   const patronymic = req.body.patronymic
   const address = req.body.address
-  const phone = req.body.phone
+  const phone = req.user.phone
   const birth = req.body.birth
   const telegramId = req.user.id
   const promocode = req.body.promocode
@@ -187,6 +226,26 @@ exports.redeemPromocode = async (req, res) => {
 
     await http.put(`/visitors/${user.documentId}`, { data: new_data })
     return res.json(current_promo)
+  } catch (error) {
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: STATUS_TEXT[STATUS_CODE.INTERNAL_SERVER_ERROR] })
+  }
+}
+
+exports.suggestAddress = async (req, res) => {
+  try {
+    const response = await addressSuggestion.post('/suggestions/api/4_1/rs/suggest/address', {
+      query: req.body.query,
+      locations: [
+        {
+          country: 'Россия'
+        }
+      ],
+      count: 5
+    })
+    return res.json(response.data.suggestions.map((e) => ({
+      value: e.value,
+      level: e.data.fias_level
+    })))
   } catch (error) {
     return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: STATUS_TEXT[STATUS_CODE.INTERNAL_SERVER_ERROR] })
   }
