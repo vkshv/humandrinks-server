@@ -10,5 +10,6 @@ router.get('/drink-categories', authUserMiddleware, authUserController.getDrinkC
 router.get('/event-items', authUserMiddleware, authUserController.getEventItems)
 router.get('/event-categories', authUserMiddleware, authUserController.getEventCategories)
 router.get('/merch-items', authUserMiddleware, authUserController.getMerchItems)
+router.get('/whats-new-items', authUserMiddleware, authUserController.getWhatsnewItems)
 
 module.exports = router

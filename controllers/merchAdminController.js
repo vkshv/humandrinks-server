@@ -73,3 +73,21 @@ exports.deleteMerchItem = async (req, res) => {
     return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
   }
 }
+
+exports.swapSortWeight = async (req, res) => {
+  try {
+    const response = await http.post('/merchs/swap-sort-weight', req.body)
+    return res.json(response.data)
+  } catch (error) {
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
+  }
+}
+
+exports.moveSortWeightOnTop = async (req, res) => {
+  try {
+    const response = await http.post(`merchs/${req.params.id}/promote-sort-weight`)
+    return res.json(response.data)
+  } catch (error) {
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error?.message ?? 'Strapi error' })
+  }
+}

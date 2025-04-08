@@ -11,5 +11,8 @@ router.post('/', authAdminMiddleware, upload.any(), drinkAdminController.createD
 router.put('/:id', authAdminMiddleware, upload.any(), drinkAdminController.updateDrinkItem)
 router.delete('/:id', authAdminMiddleware, drinkAdminController.deleteDrinkItem)
 router.get('/categories', authAdminMiddleware, drinkAdminController.getDrinkCategories)
+router.get('/subcategories', authAdminMiddleware, drinkAdminController.getDrinkSubcategories)
+router.post('/swap-sort-weight', authAdminMiddleware, drinkAdminController.swapSortWeight)
+router.post('/:id/promote-sort-weight', authAdminMiddleware, drinkAdminController.moveSortWeightOnTop)
 
 module.exports = router
