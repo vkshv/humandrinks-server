@@ -43,7 +43,8 @@ exports.authenticateUser = async (req, res) => {
         address: userRegData.address,
         phone: userRegData.phone,
         birth: userRegData.birth,
-        bonus: userRegData.bonus
+        bonus: userRegData.bonus,
+        cardNumber: userRegData.cardNumber
       })
     } else {
       return res.status(STATUS_CODE.UNAUTHORIZED).json({ message: STATUS_TEXT[STATUS_CODE.UNAUTHORIZED] })
