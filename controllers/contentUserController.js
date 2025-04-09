@@ -1,5 +1,8 @@
 const http = require('../services/http/strapiClient')
-const { STATUS_CODE } = require('../const/http')
+const { Telegraf } = require('telegraf')
+const { STATUS_CODE, STATUS_TEXT } = require('../const/http')
+const { BOT_TOKEN, TELEGRAM_CHAT_ID } = require('../config/config')
+const { verifyTelegramAuth } = require('../helpers/telegram')
 
 exports.getFoodItems = async (req, res) => {
   try {
@@ -104,5 +107,24 @@ exports.getWhatsnewItems = async (req, res) => {
     })))
   } catch (error) {
     return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: 'Упс! Категории еды не загрузились.' })
+  }
+}
+
+exports.sendBotMessage = async (req, res) => {
+  try {
+    const initData = req.body.initData
+    const message = req.body.message
+
+    if (!initData || !verifyTelegramAuth(initData)) {
+      return res.status(STATUS_CODE.BAD_REQUEST).json({ message: STATUS_TEXT[STATUS_CODE.BAD_REQUEST] })
+    }
+    const params = new URLSearchParams(initData)
+    const user = JSON.parse(params.get('user'))
+
+    const bot = new Telegraf(BOT_TOKEN)
+    await bot.telegram.sendMessage(TELEGRAM_CHAT_ID, `@${user.username}\n${message}`)
+    return res.json({})
+  } catch (error) {
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: 'Упс! Что-то пошло не так.' })
   }
 }

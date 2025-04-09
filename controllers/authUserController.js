@@ -6,22 +6,7 @@ const { setCode, getCode } = require('../stores/authCodes')
 const http = require('../services/http/strapiClient')
 const smsGateway = require('../services/http/smsGatewayClient')
 const addressSuggestion = require('../services/http/addressSuggestionClient')
-
-function verifyTelegramAuth(data) {
-  const secretKey = crypto.createHmac('sha256', 'WebAppData').update(BOT_TOKEN).digest()
-  const params = new URLSearchParams(data)
-  const hash = params.get('hash')
-  params.delete('hash')
-
-  const sortedParams = [...params.entries()]
-    .map(([key, value]) => `${key}=${value}`)
-    .sort()
-    .join('\n')
-
-  const computedHash = crypto.createHmac('sha256', secretKey).update(sortedParams).digest('hex')
-
-  return computedHash === hash
-}
+const { verifyTelegramAuth } = require('../helpers/telegram')
 
 exports.authenticateUser = async (req, res) => {
   try {
