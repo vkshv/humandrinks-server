@@ -4,7 +4,7 @@ const { JWT_USER_SECRET, JWT_USER_AUTH_SECRET, BOT_TOKEN } = require('../config/
 const { STATUS_CODE, STATUS_TEXT } = require('../const/http')
 const { setCode, getCode } = require('../stores/authCodes')
 const http = require('../services/http/strapiClient')
-const smsGateway = require('../services/http/smsGatewayClient')
+const callPassword = require('../services/http/callPasswordClient')
 const addressSuggestion = require('../services/http/addressSuggestionClient')
 const { verifyTelegramAuth } = require('../helpers/telegram')
 
@@ -39,7 +39,60 @@ exports.authenticateUser = async (req, res) => {
   }
 }
 
-exports.sendCode = async (req, res) => {
+// exports.sendCode = async (req, res) => {
+//   const phone = req.body.phone
+//   if (!/^\+7 \(\d\d\d\) \d\d\d \d\d \d\d$/.test(phone)) {
+//     return res.status(STATUS_CODE.BAD_REQUEST).json({ message: STATUS_TEXT[STATUS_CODE.BAD_REQUEST] })
+//   }
+//   const prepared_phone = phone.split('').filter((e) => ['1','2','3','4','5','6','7','8','9','0'].includes(e)).join('')
+
+//   const prev_code = getCode(prepared_phone)
+//   if (prev_code && prev_code.canBeResent === false) {
+//     return res.status(STATUS_CODE.TOO_MANY_REQUESTS).json({ message: STATUS_TEXT[STATUS_CODE.TOO_MANY_REQUESTS] })
+//   }
+//   let code
+//   if (prev_code) {
+//     code = prev_code?.code
+//   } else {
+//     code = crypto.randomInt(1000, 9999)
+//     setCode(prepared_phone, code.toString())
+//   }
+
+//   // Проверка стоимости СМС
+//   try {
+//     const response_cost = await smsGateway.post('/sms/cost', {}, {
+//       params: {
+//         to: prepared_phone,
+//         msg: code,
+//         json: 1
+//       }
+//     })
+//     if (response_cost.data.total_cost > 10) {
+//       return res.status(STATUS_CODE.FORBIDDEN).json({ message: STATUS_TEXT[STATUS_CODE.FORBIDDEN] })
+//     }
+//     if (response_cost.data.total_cost === undefined) {
+//       return res.status(STATUS_CODE.FORBIDDEN).json({ message: STATUS_TEXT[STATUS_CODE.FORBIDDEN] })
+//     }
+//   } catch (error) {
+//     return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: STATUS_TEXT[STATUS_CODE.INTERNAL_SERVER_ERROR] })
+//   }
+
+//   // Отправка СМС
+//   try {
+//     const response_send = await smsGateway.post('/sms/send', {}, {
+//       params: {
+//         to: prepared_phone,
+//         msg: code,
+//         json: 1
+//       }
+//     })
+//   } catch (error) {
+//     return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: STATUS_TEXT[STATUS_CODE.INTERNAL_SERVER_ERROR] })
+//   }
+//   return res.json({})
+// }
+
+exports.callPassword = async (req, res) => {
   const phone = req.body.phone
   if (!/^\+7 \(\d\d\d\) \d\d\d \d\d \d\d$/.test(phone)) {
     return res.status(STATUS_CODE.BAD_REQUEST).json({ message: STATUS_TEXT[STATUS_CODE.BAD_REQUEST] })
@@ -54,42 +107,14 @@ exports.sendCode = async (req, res) => {
   if (prev_code) {
     code = prev_code?.code
   } else {
-    code = crypto.randomInt(1000, 9999)
-    setCode(prepared_phone, code.toString())
-  }
-
-  // Проверка стоимости СМС
-  try {
-    const response_cost = await smsGateway.post('/sms/cost', {}, {
-      params: {
-        to: prepared_phone,
-        msg: code,
-        json: 1
-      }
-    })
-    if (response_cost.data.total_cost > 10) {
-      return res.status(STATUS_CODE.FORBIDDEN).json({ message: STATUS_TEXT[STATUS_CODE.FORBIDDEN] })
+    try {
+      const response = await callPassword.post('call/send', { to: prepared_phone })
+      setCode(prepared_phone, response.data.code)
+      return res.json({})
+    } catch (error) {
+      return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: STATUS_TEXT[STATUS_CODE.INTERNAL_SERVER_ERROR] })
     }
-    if (response_cost.data.total_cost === undefined) {
-      return res.status(STATUS_CODE.FORBIDDEN).json({ message: STATUS_TEXT[STATUS_CODE.FORBIDDEN] })
-    }
-  } catch (error) {
-    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: STATUS_TEXT[STATUS_CODE.INTERNAL_SERVER_ERROR] })
   }
-
-  // Отправка СМС
-  try {
-    const response_send = await smsGateway.post('/sms/send', {}, {
-      params: {
-        to: prepared_phone,
-        msg: code,
-        json: 1
-      }
-    })
-  } catch (error) {
-    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: STATUS_TEXT[STATUS_CODE.INTERNAL_SERVER_ERROR] })
-  }
-  return res.json({})
 }
 
 exports.validateCode = async (req, res) => {
