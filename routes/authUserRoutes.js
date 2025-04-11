@@ -12,5 +12,6 @@ router.post('/register', authUserAuthMiddleware, authUserController.registerUser
 router.get('/check-reg-promocode', authUserAuthMiddleware, authUserController.checkRegPromocode)
 router.post('/suggest-address', authUserAuthMiddleware, authUserController.suggestAddress)
 router.post('/redeem-promocode', authUserMiddleware, authUserController.redeemPromocode)
+router.post('/get-user', authUserMiddleware, authUserController.getUser)
 
 module.exports = router

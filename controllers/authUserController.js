@@ -7,6 +7,7 @@ const http = require('../services/http/strapiClient')
 const callPassword = require('../services/http/callPasswordClient')
 const addressSuggestion = require('../services/http/addressSuggestionClient')
 const { verifyTelegramAuth } = require('../helpers/telegram')
+const { registerUserInJowi } = require('../services/jowi')
 
 exports.authenticateUser = async (req, res) => {
   try {
@@ -135,6 +136,8 @@ exports.callPassword = async (req, res) => {
   try {
     const response = await callPassword.post('call/send', { to: prepared_phone })
     setCode(prepared_phone, response.data.code)
+    console.log(prepared_phone + ' ' + response.data.code)
+
     return res.json({})
   } catch (error) {
     return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: STATUS_TEXT[STATUS_CODE.INTERNAL_SERVER_ERROR] })
@@ -157,7 +160,7 @@ exports.validateCode = async (req, res) => {
   if (getCode(prepared_phone)?.code === code) {
     const params = new URLSearchParams(initData)
     const user = JSON.parse(params.get('user'))
-    const token = jwt.sign({ id: user.id, phone: prepared_phone }, JWT_USER_AUTH_SECRET, { expiresIn: '8h' })
+    const token = jwt.sign({ id: user.id, phone: prepared_phone, username: user.username }, JWT_USER_AUTH_SECRET, { expiresIn: '8h' })
     try {
       const response = await http.get(`/visitors?filters[phone]=${encodeURIComponent(prepared_phone)}`)
       if (response.data.data.length) {
@@ -189,6 +192,7 @@ exports.registerUser = async (req, res) => {
   const address = req.body.address
   const phone = req.user.phone
   const birth = req.body.birth
+  const username = req.user.username
   const telegramId = req.user.id
   const promocode = req.body.promocode
   const data = { name, surname, patronymic, address, phone, birth, telegramId, bonus: 0 }
@@ -211,9 +215,11 @@ exports.registerUser = async (req, res) => {
     const response = await http.get(`/visitors?filters[phone]=${encodeURIComponent(phone)}`)
     if (response.data.data.length) {
       await http.put(`/visitors/${response.data.data[0].documentId}`, { data })
+      registerUserInJowi({ name, patronymic, surname, address, phone, birth, username })
       return res.json({})
     } else {
       await http.post('/visitors', { data })
+      registerUserInJowi({ name, patronymic, surname, address, phone, birth, username })
       return res.json({})
     }
   } catch (error) {
