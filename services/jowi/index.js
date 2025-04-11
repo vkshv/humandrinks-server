@@ -3,13 +3,13 @@ const xlsx = require('xlsx')
 const { JOWI_WEB_URL, JOWI_RESTAURANT_ID, JOWI_USER_EMAIL, JOWI_USER_PASSWORD, BOT_TOKEN, TELEGRAM_CHAT_ID } = require('../../config/config')
 const { Telegraf } = require('telegraf')
 const FormData = require('form-data')
-const puppeteer = require('puppeteer')
+const BrowserManager = require('../http/browserManager')
 
 const signIn = async function() {
   let browser = null
   let page = null
   try {
-    browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] })
+    browser = await BrowserManager.getBrowser()
     page = await browser.newPage()
 
     const response = await page.goto(JOWI_WEB_URL + '/ru/users/sign_in', { waitUntil: 'networkidle2' })
