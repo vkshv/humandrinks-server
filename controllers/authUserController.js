@@ -39,6 +39,35 @@ exports.authenticateUser = async (req, res) => {
   }
 }
 
+exports.getUser = async (req, res) => {
+  try {
+    const initData = req.body.initData
+    if (!initData || !verifyTelegramAuth(initData)) {
+      return res.status(STATUS_CODE.BAD_REQUEST).json({ message: STATUS_TEXT[STATUS_CODE.BAD_REQUEST] })
+    }
+    const params = new URLSearchParams(initData)
+    const user = JSON.parse(params.get('user'))
+    const response = await http.get(`/visitors?filters[telegramId]=${user.id}`)
+    if (response.data.data.length) {
+      const userRegData = response.data.data[0]
+      return res.json({
+        name: userRegData.name,
+        surname: userRegData.surname,
+        patronymic: userRegData.patronymic,
+        address: userRegData.address,
+        phone: userRegData.phone,
+        birth: userRegData.birth,
+        bonus: userRegData.bonus,
+        cardNumber: userRegData.cardNumber
+      })
+    } else {
+      return res.status(STATUS_CODE.UNAUTHORIZED).json({ message: STATUS_TEXT[STATUS_CODE.UNAUTHORIZED] })
+    }
+  } catch (error) {
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: STATUS_TEXT[STATUS_CODE.INTERNAL_SERVER_ERROR] })
+  }
+}
+
 // exports.sendCode = async (req, res) => {
 //   const phone = req.body.phone
 //   if (!/^\+7 \(\d\d\d\) \d\d\d \d\d \d\d$/.test(phone)) {
@@ -103,17 +132,12 @@ exports.callPassword = async (req, res) => {
   if (prev_code && prev_code.canBeResent === false) {
     return res.status(STATUS_CODE.TOO_MANY_REQUESTS).json({ message: STATUS_TEXT[STATUS_CODE.TOO_MANY_REQUESTS] })
   }
-  let code
-  if (prev_code) {
-    code = prev_code?.code
-  } else {
-    try {
-      const response = await callPassword.post('call/send', { to: prepared_phone })
-      setCode(prepared_phone, response.data.code)
-      return res.json({})
-    } catch (error) {
-      return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: STATUS_TEXT[STATUS_CODE.INTERNAL_SERVER_ERROR] })
-    }
+  try {
+    const response = await callPassword.post('call/send', { to: prepared_phone })
+    setCode(prepared_phone, response.data.code)
+    return res.json({})
+  } catch (error) {
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: STATUS_TEXT[STATUS_CODE.INTERNAL_SERVER_ERROR] })
   }
 }
 
