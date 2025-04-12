@@ -2,7 +2,7 @@ const axios = require('axios')
 // const xlsx = require('xlsx')
 const cheerio = require('cheerio')
 const { decode: decodeHtml } = require('html-entities')
-const { JOWI_WEB_URL, JOWI_RESTAURANT_ID, JOWI_USER_EMAIL, JOWI_USER_PASSWORD, BOT_TOKEN, TELEGRAM_CHAT_ID } = require('../../config/config')
+const { JOWI_WEB_URL, JOWI_RESTAURANT_ID, JOWI_USER_EMAIL, JOWI_USER_PASSWORD, BOT_TOKEN, TELEGRAM_ERROR_LOG_CHAT_ID } = require('../../config/config')
 const { Telegraf } = require('telegraf')
 const FormData = require('form-data')
 const BrowserManager = require('../http/browserManager')
@@ -35,7 +35,7 @@ const strapiClient = require('../http/strapiClient')
 const sendJowiAlert = async function(message) {
   try {
     const bot = new Telegraf(BOT_TOKEN)
-    await bot.telegram.sendMessage(TELEGRAM_CHAT_ID, message)
+    await bot.telegram.sendMessage(TELEGRAM_ERROR_LOG_CHAT_ID, message)
   } catch (error) {}
 }
 
