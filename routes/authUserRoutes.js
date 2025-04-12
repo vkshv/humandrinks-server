@@ -13,5 +13,6 @@ router.get('/check-reg-promocode', authUserAuthMiddleware, authUserController.ch
 router.post('/suggest-address', authUserAuthMiddleware, authUserController.suggestAddress)
 router.post('/redeem-promocode', authUserMiddleware, authUserController.redeemPromocode)
 router.post('/get-user', authUserMiddleware, authUserController.getUser)
+router.post('/sync-visitor', authUserMiddleware, authUserController.syncVisitor)
 
 module.exports = router

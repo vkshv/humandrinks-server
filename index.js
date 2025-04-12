@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 require('dotenv').config()
+const BrowserManager = require('./services/http/browserManager')
 
 const { STATUS_CODE, STATUS_TEXT } = require('./const/http')
 
@@ -23,4 +24,7 @@ app.use((req, res) => {
 })
 
 const PORT = process.env.PORT
-app.listen(PORT, () => console.log(`Server listening on port ${PORT}`))
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`)
+  BrowserManager.signInJowi()
+})

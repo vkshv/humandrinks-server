@@ -7,7 +7,7 @@ const http = require('../services/http/strapiClient')
 const callPassword = require('../services/http/callPasswordClient')
 const addressSuggestion = require('../services/http/addressSuggestionClient')
 const { verifyTelegramAuth } = require('../helpers/telegram')
-const { registerUserInJowi } = require('../services/jowi')
+const { registerUserInJowi, syncVisitor } = require('../services/jowi')
 
 exports.authenticateUser = async (req, res) => {
   try {
@@ -20,7 +20,7 @@ exports.authenticateUser = async (req, res) => {
     const response = await http.get(`/visitors?filters[telegramId]=${user.id}`)
     if (response.data.data.length) {
       const userRegData = response.data.data[0]
-      const token = jwt.sign({ id: user.id, username: user.username }, JWT_USER_SECRET, { expiresIn: '8h' })
+      const token = jwt.sign({ id: user.id, username: user.username, documentId: userRegData.documentId }, JWT_USER_SECRET, { expiresIn: '8h' })
       return res.json({
         token,
         name: userRegData.name,
@@ -290,4 +290,14 @@ exports.suggestAddress = async (req, res) => {
   } catch (error) {
     return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: STATUS_TEXT[STATUS_CODE.INTERNAL_SERVER_ERROR] })
   }
+}
+
+exports.syncVisitor = async (req, res) => {
+  const user = {
+    ...req.body,
+    documentId: req.user.documentId,
+    username: req.user.username
+  }
+  const sync = await syncVisitor(user)
+  return res.json({ ...sync })
 }
