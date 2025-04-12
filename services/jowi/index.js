@@ -193,7 +193,6 @@ const syncVisitor = async function(user) {
     if (responseJowiAutocomplete.data.clients.length > 1) {
       // Это условие не должно быть true: Jowi не позволяет создавать пользователей с одинаковым телефоном
       await sendJowiAlert(`При синхронизации с Jowi обнаружено более одного пользователя с таким телефоном\n${formatUser(user)}\nERR203`)
-      return
     }
     const responseJowiClient = await axios.get(`${JOWI_WEB_URL}/ru/restaurants/${JOWI_RESTAURANT_ID}/clients/${responseJowiAutocomplete.data.clients[0].id}`, {
       params: {
