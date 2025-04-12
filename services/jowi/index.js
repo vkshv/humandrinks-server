@@ -171,6 +171,8 @@ const syncVisitor = async function(user) {
   const csrfToken = BrowserManager.getCsrfToken()
 
   try {
+    if (user.phone.includes('9530380043')) console.log('0')
+
     const responseJowiAutocomplete = await axios.get(`${JOWI_WEB_URL}/ru/restaurants/${JOWI_RESTAURANT_ID}/clients_autocomplete`, {
       params: {
         type: 'search_by_phone_number',
@@ -186,14 +188,20 @@ const syncVisitor = async function(user) {
         'X-Requested-With': 'XMLHttpRequest'
       }
     })
+    if (user.phone.includes('9530380043')) console.log('1')
+
     if (responseJowiAutocomplete.data.clients.length === 0) {
       await registerUserInJowi(user)
       return
     }
+    if (user.phone.includes('9530380043')) console.log('2')
+
     if (responseJowiAutocomplete.data.clients.length > 1) {
       // Это условие не должно быть true: Jowi не позволяет создавать пользователей с одинаковым телефоном
       await sendJowiAlert(`При синхронизации с Jowi обнаружено более одного пользователя с таким телефоном\n${formatUser(user)}\nERR203`)
     }
+    if (user.phone.includes('9530380043')) console.log('3')
+
     const responseJowiClient = await axios.get(`${JOWI_WEB_URL}/ru/restaurants/${JOWI_RESTAURANT_ID}/clients/${responseJowiAutocomplete.data.clients[0].id}`, {
       params: {
         format: 'js',
@@ -208,17 +216,25 @@ const syncVisitor = async function(user) {
         'X-Requested-With': 'XMLHttpRequest'
       }
     })
+    if (user.phone.includes('9530380043')) console.log('4')
+
     const htmlStart = responseJowiClient.data.indexOf('<table class=')
     const htmlEnd = responseJowiClient.data.indexOf('<\\/table>') + 9
     const cleanHtml = responseJowiClient.data.slice(htmlStart, htmlEnd)
+
+    if (user.phone.includes('9530380043')) console.log('5')
 
     const $ = cheerio.load(universal_decode(cleanHtml))
     const secondRow = $('table.data_table.details_table tr').eq(1)
     const cardNumber = secondRow.find('td').eq(2).text()
     const bonus = secondRow.find('td').eq(6).text()
 
+    if (user.phone.includes('9530380043')) console.log('6')
+
     if (`${cardNumber}` !== `${user.cardNumber}` || `${bonus}` !== `${user.bonus}`) {
       await strapiClient.put(`/visitors/${user.documentId}`, { data: { cardNumber, bonus } })
+      if (user.phone.includes('9530380043')) console.log('7')
+
       return { cardNumber, bonus }
     }
   } catch (error) {
