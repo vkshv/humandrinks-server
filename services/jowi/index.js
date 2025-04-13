@@ -213,7 +213,7 @@ const syncVisitor = async function(user) {
     const cleanHtml = responseJowiClient.data.slice(htmlStart, htmlEnd)
 
     const $ = cheerio.load(universal_decode(cleanHtml))
-    const secondRow = $('table.data_table.details_table tr').eq(1)
+    const secondRow = $('table.data_table.details_table tr:last')
     const cardNumber = secondRow.find('td').eq(2).text()
     const bonus_dirty = secondRow.find('td').eq(6).text()
     const bonus = parseInt(bonus_dirty.replace(/\s/g, ''), 10)
