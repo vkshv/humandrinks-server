@@ -151,6 +151,30 @@ function universal_decode(rawStr) {
   return decodeHtml(jsUnescaped);
 }
 
+const searchUserInJowiByPhone = async function(phone) {
+  const cookieHeader = BrowserManager.getCookieHeader()
+  const csrfToken = BrowserManager.getCsrfToken()
+
+  try {
+    const responseJowiAutocomplete = await axios.get(`${JOWI_WEB_URL}/ru/restaurants/${JOWI_RESTAURANT_ID}/clients_autocomplete`, {
+      params: {
+        type: 'search_by_phone_number',
+        format: 'json',
+        title: phone.slice(1)
+      },
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+        'X-CSRF-Token': csrfToken,
+        Cookie: cookieHeader,
+        // Origin: JOWI_WEB_URL,
+        Referer: `${JOWI_WEB_URL}/ru/restaurants/${JOWI_RESTAURANT_ID}/clients`,
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    return responseJowiAutocomplete.data.clients
+  } catch (error) {}
+}
+
 // Разработчику стыдно за этот монструозный метод, но по-другому у него не получилось :-(
 const syncVisitor = async function(user) {
   // const pup = await signIn()
@@ -171,30 +195,19 @@ const syncVisitor = async function(user) {
   const csrfToken = BrowserManager.getCsrfToken()
 
   try {
-    const responseJowiAutocomplete = await axios.get(`${JOWI_WEB_URL}/ru/restaurants/${JOWI_RESTAURANT_ID}/clients_autocomplete`, {
-      params: {
-        type: 'search_by_phone_number',
-        format: 'json',
-        title: user.phone.slice(1)
-      },
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8',
-        'X-CSRF-Token': csrfToken,
-        Cookie: cookieHeader,
-        // Origin: JOWI_WEB_URL,
-        Referer: `${JOWI_WEB_URL}/ru/restaurants/${JOWI_RESTAURANT_ID}/clients`,
-        'X-Requested-With': 'XMLHttpRequest'
-      }
-    })
-    if (responseJowiAutocomplete.data.clients.length === 0) {
+    const searchResult = await searchUserInJowiByPhone(user.phone)
+    if (!searchResult) {
+      throw true
+    }
+    if (searchResult.length === 0) {
       await registerUserInJowi(user)
       return
     }
-    if (responseJowiAutocomplete.data.clients.length > 1) {
+    if (searchResult.length > 1) {
       // Это условие не должно быть true: Jowi не позволяет создавать пользователей с одинаковым телефоном
       await sendJowiAlert(`При синхронизации с Jowi обнаружено более одного пользователя с таким телефоном\n${formatUser(user)}\nERR203`)
     }
-    const responseJowiClient = await axios.get(`${JOWI_WEB_URL}/ru/restaurants/${JOWI_RESTAURANT_ID}/clients/${responseJowiAutocomplete.data.clients[0].id}`, {
+    const responseJowiClient = await axios.get(`${JOWI_WEB_URL}/ru/restaurants/${JOWI_RESTAURANT_ID}/clients/${searchResult[0].id}`, {
       params: {
         format: 'js',
         from_restaurants_ids: ''
@@ -229,5 +242,6 @@ const syncVisitor = async function(user) {
 
 module.exports = {
   registerUserInJowi,
+  searchUserInJowiByPhone,
   syncVisitor
 }

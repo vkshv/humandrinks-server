@@ -7,7 +7,7 @@ const http = require('../services/http/strapiClient')
 const callPassword = require('../services/http/callPasswordClient')
 const addressSuggestion = require('../services/http/addressSuggestionClient')
 const { verifyTelegramAuth } = require('../helpers/telegram')
-const { registerUserInJowi, syncVisitor } = require('../services/jowi')
+const { registerUserInJowi, searchUserInJowiByPhone, syncVisitor } = require('../services/jowi')
 
 exports.authenticateUser = async (req, res) => {
   try {
@@ -215,13 +215,17 @@ exports.registerUser = async (req, res) => {
     const response = await http.get(`/visitors?filters[phone]=${encodeURIComponent(phone)}`)
     if (response.data.data.length) {
       await http.put(`/visitors/${response.data.data[0].documentId}`, { data })
-      registerUserInJowi({ name, patronymic, surname, address, phone, birth, username })
-      return res.json({})
     } else {
       await http.post('/visitors', { data })
-      registerUserInJowi({ name, patronymic, surname, address, phone, birth, username })
-      return res.json({})
     }
+
+    searchUserInJowiByPhone(phone).then((searchUserResult) => {
+      if (searchUserResult && searchUserResult.length === 0) {
+        registerUserInJowi({ name, patronymic, surname, address, phone, birth, username })
+      }
+    })
+
+    return res.json({})
   } catch (error) {
     return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: STATUS_TEXT[STATUS_CODE.INTERNAL_SERVER_ERROR] })
   }
