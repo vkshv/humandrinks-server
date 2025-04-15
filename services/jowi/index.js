@@ -36,10 +36,8 @@ const sendJowiAlert = async function(message) {
   try {
     const bot = new Telegraf(BOT_TOKEN)
     await bot.telegram.sendMessage(TELEGRAM_ERROR_LOG_CHAT_ID, message)
-    console.log('SEND_JOWI_ALERT', message)
-    console.log(BOT_TOKEN, TELEGRAM_ERROR_LOG_CHAT_ID)
   } catch (error) {
-    console.log('error', error)
+    console.log('SEND_JOWI_ALERT_ERROR', error)
   }
 }
 
