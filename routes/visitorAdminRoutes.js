@@ -10,5 +10,6 @@ router.get('/', authAdminMiddleware, visitorAdminController.getVisitorItems)
 router.post('/', authAdminMiddleware, upload.any(), visitorAdminController.createVisitorItem)
 router.put('/:id', authAdminMiddleware, upload.any(), visitorAdminController.updateVisitorItem)
 router.delete('/:id', authAdminMiddleware, visitorAdminController.deleteVisitorItem)
+router.post('/send-messages', authAdminMiddleware, visitorAdminController.sendMessage)
 
 module.exports = router
