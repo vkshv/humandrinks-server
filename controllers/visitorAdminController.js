@@ -63,7 +63,7 @@ exports.sendMessage = async (req, res) => {
     }
   }
 
-  const batchSize = 10
+  const batchSize = 50
   for (let i = 0; i < chatIds.length; i += batchSize) {
     const batch = chatIds.slice(i, i + batchSize)
     await Promise.all(batch.map(sendToChat))
