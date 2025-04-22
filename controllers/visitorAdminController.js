@@ -63,7 +63,7 @@ exports.sendMessage = async (req, res) => {
     } catch (error) {
       unsuccessfulChatIds.push(chatId)
     }
-    await delay(25)
+    await delay(5)
   }
   return res.json({
     fullSuccess: unsuccessfulChatIds.length === 0,
