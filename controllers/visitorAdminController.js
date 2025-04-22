@@ -44,9 +44,6 @@ exports.deleteVisitorItem = async (req, res) => {
 }
 
 exports.sendMessage = async (req, res) => {
-  const delay = function(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms))
-  }
   const unsuccessfulChatIds = []
 
   const chatIds = req.body.chatIds
@@ -54,19 +51,27 @@ exports.sendMessage = async (req, res) => {
   if (!Array.isArray(chatIds) || !text) {
     return res.status(STATUS_CODE.BAD_REQUEST).json({ message: STATUS_TEXT[STATUS_CODE.BAD_REQUEST] })
   }
-  for (const chatId of chatIds) {
+
+  const sendToChat = async (chatId) => {
     try {
       await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         chat_id: chatId,
-        text
+        text,
       })
     } catch (error) {
       unsuccessfulChatIds.push(chatId)
     }
-    await delay(5)
   }
+
+  const batchSize = 10
+  for (let i = 0; i < chatIds.length; i += batchSize) {
+    const batch = chatIds.slice(i, i + batchSize)
+    await Promise.all(batch.map(sendToChat))
+    await new Promise(resolve => setTimeout(resolve, 25))
+  }
+
   return res.json({
     fullSuccess: unsuccessfulChatIds.length === 0,
-    unsuccessfulChatIds
+    unsuccessfulChatIds,
   })
 }
