@@ -7,8 +7,15 @@ const router = express.Router()
 const upload = multer({ dest: 'uploads/' })
 
 function multerErrorHandler(err, req, res, next) {
-  console.error('Multer Error:', err)
-  res.status(500).json({ message: 'Multer processing failed', error: err.message })
+  console.error('Multer Error Caught:', err)
+
+  if (err instanceof multer.MulterError) {
+    return res.status(400).json({ message: `Multer error: ${err.message}` })
+  } else if (err) {
+    return res.status(500).json({ message: `Unexpected error: ${err.message}` })
+  }
+
+  next()
 }
 
 router.get('/', authAdminMiddleware, eventAdminController.getEventItems)
