@@ -16,6 +16,9 @@ exports.createEventItem = async (req, res) => {
   try {
     if (req.files?.length) {
       const formData = new FormData()
+      // ---
+      console.log('files.length')
+      // ---
       formData.append('ref', 'events')
       formData.append('field', 'picture')
       formData.append('files', fs.createReadStream(req.files[0].path), req.files[0].originalname)
