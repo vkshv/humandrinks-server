@@ -19,14 +19,26 @@ exports.createEventItem = async (req, res) => {
       formData.append('ref', 'events')
       formData.append('field', 'picture')
       formData.append('files', fs.createReadStream(req.files[0].path), req.files[0].originalname)
+      // ---
+      console.log('formData', formData)
+      // ---
       const responseUpload = await http.post('/upload', formData)
+      // ---
+      console.log('responseUpload', responseUpload.data)
+      // ---
       fs.unlinkSync(req.files[0].path)
 
       const data = { data: {
         ...JSON.parse(req.body.data),
         picture: responseUpload.data[0].id
       } }
+      // ---
+      console.log('data', data)
+      // ---
       const response = await http.post('/events', data)
+      // ---
+      console.log('data', data)
+      // ---
       return res.json(response.data)
     } else {
       const data = { data: JSON.parse(req.body.data) }
