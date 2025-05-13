@@ -4,7 +4,10 @@ const eventAdminController = require('../controllers/eventAdminController')
 const authAdminMiddleware = require('../middleware/authAdminMiddleware')
 
 const router = express.Router()
-const upload = multer({ dest: 'uploads/' })
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 20 * 1024 * 1024 }
+})
 
 function multerErrorHandler(err, req, res, next) {
   console.error('Multer Error Caught:', err)
