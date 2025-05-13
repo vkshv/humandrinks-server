@@ -13,7 +13,6 @@ exports.getEventItems = async (req, res) => {
 }
 
 exports.createEventItem = async (req, res) => {
-  console.log('createEventItem')
   try {
     if (req.files?.length) {
       const formData = new FormData()
