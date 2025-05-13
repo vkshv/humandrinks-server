@@ -44,9 +44,8 @@ exports.updateEventItem = async (req, res) => {
       formData.append('ref', 'events')
       formData.append('refId', req.params.id)
       formData.append('field', 'picture')
-      formData.append('files', fs.createReadStream(req.files[0].path), req.files[0].originalname)
+      formData.append('files', req.files[0].buffer, req.files[0].originalname)
       const responseUpload = await http.post('/upload', formData)
-      fs.unlinkSync(req.files[0].path)
 
       const data = { data: {
         ...JSON.parse(req.body.data),

@@ -4,7 +4,10 @@ const foodAdminController = require('../controllers/foodAdminController')
 const authAdminMiddleware = require('../middleware/authAdminMiddleware')
 
 const router = express.Router()
-const upload = multer({ dest: 'uploads/' })
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }
+})
 
 router.get('/', authAdminMiddleware, foodAdminController.getFoodItems)
 router.post('/', authAdminMiddleware, upload.any(), foodAdminController.createFoodItem)
