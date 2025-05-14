@@ -46,7 +46,6 @@ exports.updateEventItem = async (req, res) => {
       formData.append('field', 'picture')
       formData.append('files', req.files[0].buffer, req.files[0].originalname)
       const responseUpload = await http.post('/upload', formData)
-      console.log('responseUpload', responseUpload.data[0])
 
       const data = { data: {
         ...JSON.parse(req.body.data),

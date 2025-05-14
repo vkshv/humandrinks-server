@@ -12,6 +12,7 @@ const { registerUserInJowi, searchUserInJowiByPhone, syncVisitor } = require('..
 exports.authenticateUser = async (req, res) => {
   try {
     const initData = req.body.initData
+    const utm_source = req.body.utm_source
     if (!initData || !verifyTelegramAuth(initData)) {
       return res.status(STATUS_CODE.BAD_REQUEST).json({ message: STATUS_TEXT[STATUS_CODE.BAD_REQUEST] })
     }
@@ -19,6 +20,8 @@ exports.authenticateUser = async (req, res) => {
     const user = JSON.parse(params.get('user'))
     const response = await http.get(`/visitors?filters[telegramId]=${user.id}`)
     if (response.data.data.length) {
+      if (utm_source) await http.post('/utm/increment', { source: `AUTH_${utm_source}` })
+
       const userRegData = response.data.data[0]
       const token = jwt.sign({ id: user.id, username: user.username, documentId: userRegData.documentId }, JWT_USER_SECRET, { expiresIn: '8h' })
       return res.json({
@@ -195,7 +198,8 @@ exports.registerUser = async (req, res) => {
   const username = req.user.username
   const telegramId = req.user.id
   const promocode = req.body.promocode
-  const data = { name, surname, patronymic, address, phone, birth, telegramId, bonus: 0 }
+  const utm_source = req.body.utm_source
+  const data = { name, surname, patronymic, address, phone, birth, telegramId, utm_source, bonus: 0 }
 
   if (promocode) {
     try {
@@ -212,6 +216,8 @@ exports.registerUser = async (req, res) => {
   }
 
   try {
+    if (utm_source) await http.post('/utm/increment', { source: `REG_${utm_source}` })
+
     const response = await http.get(`/visitors?filters[phone]=${encodeURIComponent(phone)}`)
     if (response.data.data.length) {
       await http.put(`/visitors/${response.data.data[0].documentId}`, { data })
