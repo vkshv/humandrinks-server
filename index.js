@@ -16,6 +16,7 @@ app.use('/api/admin/event', require('./routes/eventAdminRoutes'))
 app.use('/api/admin/merch', require('./routes/merchAdminRoutes'))
 app.use('/api/admin/visitor', require('./routes/visitorAdminRoutes'))
 app.use('/api/admin/whats-new', require('./routes/whatsNewAdminRoutes'))
+app.use('/api/admin/utm', require('./routes/utmAdminRoutes'))
 
 app.use('/api/auth', require('./routes/authUserRoutes'))
 app.use('/api/content', require('./routes/contentUserRoutes'))
