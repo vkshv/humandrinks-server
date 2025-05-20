@@ -226,8 +226,12 @@ exports.registerUser = async (req, res) => {
   }
 
   if (referral_code) {
+    console.log('referral_code', referral_code)
     try {
       const [ referrerTelegramId, programSlug ] = decodeBase64ForUrl(referral_code, BASE64_FOR_URL_SALT).split(' ')
+      console.log('decodeBase64ForUrl', decodeBase64ForUrl(referral_code, BASE64_FOR_URL_SALT))
+      console.log('referrerTelegramId', referrerTelegramId)
+      console.log('programSlug', programSlug)
       data.referralProgram = { referrerTelegramId, programSlug, activated: false }
     } catch (error) {}
   }
