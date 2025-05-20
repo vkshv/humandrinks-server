@@ -14,5 +14,6 @@ router.post('/suggest-address', authUserAuthMiddleware, authUserController.sugge
 router.post('/redeem-promocode', authUserMiddleware, authUserController.redeemPromocode)
 router.post('/get-user', authUserMiddleware, authUserController.getUser)
 router.post('/sync-visitor', authUserMiddleware, authUserController.syncVisitor)
+router.get('/get-referral-program', authUserAuthMiddleware, authUserController.getReferralProgram)
 
 module.exports = router

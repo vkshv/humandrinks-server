@@ -1,12 +1,13 @@
 const crypto = require('crypto')
 const jwt = require('jsonwebtoken')
-const { JWT_USER_SECRET, JWT_USER_AUTH_SECRET, BOT_TOKEN } = require('../config/config')
+const { JWT_USER_SECRET, JWT_USER_AUTH_SECRET, BOT_TOKEN, BASE64_FOR_URL_SALT } = require('../config/config')
 const { STATUS_CODE, STATUS_TEXT } = require('../const/http')
 const { setCode, getCode } = require('../stores/authCodes')
 const http = require('../services/http/strapiClient')
 const callPassword = require('../services/http/callPasswordClient')
 const addressSuggestion = require('../services/http/addressSuggestionClient')
 const { verifyTelegramAuth } = require('../helpers/telegram')
+const { encodeBase64ForUrl, decodeBase64ForUrl } = require('../helpers/crypto')
 const { registerUserInJowi, searchUserInJowiByPhone, syncVisitor } = require('../services/jowi')
 
 exports.authenticateUser = async (req, res) => {
@@ -24,6 +25,8 @@ exports.authenticateUser = async (req, res) => {
 
       const userRegData = response.data.data[0]
       const token = jwt.sign({ id: user.id, username: user.username, documentId: userRegData.documentId }, JWT_USER_SECRET, { expiresIn: '8h' })
+      const program_slug = 'default' // Возможно будут другие реферальные программы
+      const referralCode = encodeBase64ForUrl(`${user.id} ${program_slug}`, BASE64_FOR_URL_SALT)
       return res.json({
         token,
         name: userRegData.name,
@@ -33,7 +36,9 @@ exports.authenticateUser = async (req, res) => {
         phone: userRegData.phone,
         birth: userRegData.birth,
         bonus: userRegData.bonus,
-        cardNumber: userRegData.cardNumber
+        cardNumber: userRegData.cardNumber,
+        referralProgram: userRegData.referralProgram,
+        referralCode
       })
     } else {
       return res.status(STATUS_CODE.UNAUTHORIZED).json({ message: STATUS_TEXT[STATUS_CODE.UNAUTHORIZED] })
@@ -54,6 +59,8 @@ exports.getUser = async (req, res) => {
     const response = await http.get(`/visitors?filters[telegramId]=${user.id}`)
     if (response.data.data.length) {
       const userRegData = response.data.data[0]
+      const program_slug = 'default' // Возможно будут другие реферальные программы
+      const referralCode = encodeBase64ForUrl(`${user.id} ${program_slug}`, BASE64_FOR_URL_SALT)
       return res.json({
         name: userRegData.name,
         surname: userRegData.surname,
@@ -62,7 +69,9 @@ exports.getUser = async (req, res) => {
         phone: userRegData.phone,
         birth: userRegData.birth,
         bonus: userRegData.bonus,
-        cardNumber: userRegData.cardNumber
+        cardNumber: userRegData.cardNumber,
+        referralProgram: userRegData.referralProgram,
+        referralCode
       })
     } else {
       return res.status(STATUS_CODE.UNAUTHORIZED).json({ message: STATUS_TEXT[STATUS_CODE.UNAUTHORIZED] })
@@ -199,6 +208,7 @@ exports.registerUser = async (req, res) => {
   const telegramId = req.user.id
   const promocode = req.body.promocode
   const utm_source = req.body.utm_source
+  const referral_code = req.body.referral_code
   const data = { name, surname, patronymic, address, phone, birth, telegramId, utm_source, bonus: 0 }
 
   if (promocode) {
@@ -213,6 +223,13 @@ exports.registerUser = async (req, res) => {
 
   if (!name || !surname || !patronymic || !address || !phone || !birth) {
     return res.status(STATUS_CODE.BAD_REQUEST).json({ message: STATUS_TEXT[STATUS_CODE.BAD_REQUEST] })
+  }
+
+  if (referral_code) {
+    try {
+      const [ referrerTelegramId, programSlug ] = decodeBase64ForUrl(referral_code, BASE64_FOR_URL_SALT).split(' ')
+      data.referralProgram = { referrerTelegramId, programSlug, activated: false }
+    } catch (error) {}
   }
 
   try {
@@ -310,4 +327,25 @@ exports.syncVisitor = async (req, res) => {
   }
   const sync = await syncVisitor(user)
   return res.json({ ...sync })
+}
+
+exports.getReferralProgram = async (req, res) => {
+  try {
+    const slug = req.query.slug
+    if (!slug) {
+      return res.status(STATUS_CODE.BAD_REQUEST).json({ message: STATUS_TEXT[STATUS_CODE.BAD_REQUEST] })
+    }
+    const response = await http.get(`/referral-program?filters[slug]=${slug}`, { params: { populate: '*' } })
+    if (!response.data.data.length) return res.status(STATUS_CODE.NOT_FOUND).json({ message: STATUS_TEXT[STATUS_CODE.NOT_FOUND] })
+    const { referral_title, referral_description, referral_picture, referral_bonus_type, referral_bonus_value } = response.data.data[0]
+    return res.json({
+      referral_title,
+      referral_description,
+      referral_picture: referral_picture?.url,
+      referral_bonus_type,
+      referral_bonus_value
+    })
+  } catch (error) {
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: STATUS_TEXT[STATUS_CODE.INTERNAL_SERVER_ERROR] })
+  }
 }
