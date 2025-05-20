@@ -216,9 +216,7 @@ exports.registerUser = async (req, res) => {
   }
 
   try {
-    console.log('1', utm_source)
     if (utm_source) await http.post('/utm/increment', { source: `REG_${utm_source}` })
-    console.log('2')
 
     const response = await http.get(`/visitors?filters[phone]=${encodeURIComponent(phone)}`)
     if (response.data.data.length) {
@@ -235,7 +233,6 @@ exports.registerUser = async (req, res) => {
 
     return res.json({})
   } catch (error) {
-    console.log('error', error, error?.response)
     return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: STATUS_TEXT[STATUS_CODE.INTERNAL_SERVER_ERROR] })
   }
 }
