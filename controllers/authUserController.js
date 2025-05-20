@@ -335,7 +335,7 @@ exports.getReferralProgram = async (req, res) => {
     if (!slug) {
       return res.status(STATUS_CODE.BAD_REQUEST).json({ message: STATUS_TEXT[STATUS_CODE.BAD_REQUEST] })
     }
-    const response = await http.get(`/referral-program?filters[slug]=${slug}`, { params: { populate: '*' } })
+    const response = await http.get(`/referral-programs?filters[slug]=${slug}`, { params: { populate: '*' } })
     if (!response.data.data.length) return res.status(STATUS_CODE.NOT_FOUND).json({ message: STATUS_TEXT[STATUS_CODE.NOT_FOUND] })
     const { referral_title, referral_description, referral_picture, referral_bonus_type, referral_bonus_value } = response.data.data[0]
     return res.json({
