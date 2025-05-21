@@ -24,7 +24,12 @@ exports.authenticateUser = async (req, res) => {
       if (utm_source) await http.post('/utm/increment', { source: `AUTH_${utm_source}` })
 
       const userRegData = response.data.data[0]
-      const token = jwt.sign({ id: user.id, username: user.username, documentId: userRegData.documentId }, JWT_USER_SECRET, { expiresIn: '8h' })
+      const token = jwt.sign({
+        id: user.id,
+        documentId: userRegData.documentId,
+        username: user.username,
+        isAdmin: userRegData.isAdmin
+      }, JWT_USER_SECRET, { expiresIn: '8h' })
       const program_slug = 'default' // Возможно будут другие реферальные программы
       const referralCode = encodeBase64ForUrl(`${user.id} ${program_slug}`, BASE64_FOR_URL_SALT)
       return res.json({
@@ -38,7 +43,8 @@ exports.authenticateUser = async (req, res) => {
         bonus: userRegData.bonus,
         cardNumber: userRegData.cardNumber,
         referralProgram: userRegData.referralProgram,
-        referralCode
+        referralCode,
+        ...(userRegData.isAdmin ? { isAdmin: true } : {})
       })
     } else {
       return res.status(STATUS_CODE.UNAUTHORIZED).json({ message: STATUS_TEXT[STATUS_CODE.UNAUTHORIZED] })
@@ -71,7 +77,8 @@ exports.getUser = async (req, res) => {
         bonus: userRegData.bonus,
         cardNumber: userRegData.cardNumber,
         referralProgram: userRegData.referralProgram,
-        referralCode
+        referralCode,
+        ...(userRegData.isAdmin ? { isAdmin: true } : {})
       })
     } else {
       return res.status(STATUS_CODE.UNAUTHORIZED).json({ message: STATUS_TEXT[STATUS_CODE.UNAUTHORIZED] })
