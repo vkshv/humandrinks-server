@@ -255,7 +255,7 @@ exports.registerUser = async (req, res) => {
       }
     })
 
-    return res.json(data)
+    return res.json({})
   } catch (error) {
     return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: STATUS_TEXT[STATUS_CODE.INTERNAL_SERVER_ERROR] })
   }
