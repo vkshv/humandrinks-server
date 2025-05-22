@@ -20,6 +20,7 @@ app.use('/api/admin/utm', require('./routes/utmAdminRoutes'))
 
 app.use('/api/auth', require('./routes/authUserRoutes'))
 app.use('/api/content', require('./routes/contentUserRoutes'))
+app.use('/api/agent', require('./routes/agentRoutes'))
 
 app.use((req, res) => {
   res.status(STATUS_CODE.NOT_FOUND).json({ message: STATUS_TEXT[STATUS_CODE.NOT_FOUND] })
