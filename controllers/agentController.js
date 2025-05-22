@@ -51,7 +51,7 @@ exports.activateReferralProgram = async (req, res) => {
       }
     }
     console.log('2')
-    await http.put(`/visitors/${referralUser.id}`, referral_data)
+    await http.put(`/visitors/${referralUser.documentId}`, referral_data)
     console.log('3')
 
     const referrer_data = {
@@ -60,7 +60,7 @@ exports.activateReferralProgram = async (req, res) => {
       }
     }
     console.log('4')
-    await http.put(`/visitors/${referrerUser.id}`, referrer_data)
+    await http.put(`/visitors/${referrerUser.documentId}`, referrer_data)
     console.log('5')
 
     return res.json({})
