@@ -49,7 +49,7 @@ exports.activateReferralProgram = async (req, res) => {
 
     const referrer_data = {
       data: {
-        bonus: (referrerUser.bonus ?? 0) + referralProgram.referrer_bonus_value
+        bonus: (referrerUser.bonus ?? 0) + +referralProgram.referrer_bonus_value
       }
     }
     await http.put(`/visitors/${referrerUser.documentId}`, referrer_data)
