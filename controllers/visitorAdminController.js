@@ -109,8 +109,8 @@ exports.sendPhoto = async (req, res) => {
   }
 
   const batchSize = 50
-  for (let i = 0; i < chatIds.length; i += batchSize) {
-    const batch = chatIds.slice(i, i + batchSize)
+  for (let i = 0; i < bodyData.chatIds.length; i += batchSize) {
+    const batch = bodyData.chatIds.slice(i, i + batchSize)
     await Promise.all(batch.map(sendToChat))
     await new Promise(resolve => setTimeout(resolve, 25))
   }
