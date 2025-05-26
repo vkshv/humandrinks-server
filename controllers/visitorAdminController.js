@@ -99,7 +99,7 @@ exports.sendPhoto = async (req, res) => {
     form.append('chat_id', chatId)
     form.append('caption', bodyData.text)
     if (req.files[0]) {
-      form.append('photo', req.files[0].buffer)
+      form.append('photo', req.files[0].buffer, req.files[0].originalname)
     }
     form.append('reply_markup', JSON.stringify(bodyData.reply_markup))
 
