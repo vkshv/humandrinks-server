@@ -1,5 +1,5 @@
 const axios = require('axios')
-// const xlsx = require('xlsx')
+const xlsx = require('xlsx')
 const cheerio = require('cheerio')
 const { decode: decodeHtml } = require('html-entities')
 const { JOWI_WEB_URL, JOWI_RESTAURANT_ID, JOWI_USER_EMAIL, JOWI_USER_PASSWORD, BOT_TOKEN, TELEGRAM_ERROR_LOG_CHAT_ID } = require('../../config/config')
@@ -102,6 +102,47 @@ const registerUserInJowi = async function(user) {
   }
 }
 
+const getJowiClientReport = async function(from_date, to_date) {
+  const cookieHeader = BrowserManager.getCookieHeader()
+  const csrfToken = BrowserManager.getCsrfToken()
+
+  const form = new FormData()
+
+  form.append('_method', 'get')
+  form.append('authenticity_token', csrfToken)
+
+  let response
+  try {
+    response = await axios.post(`${JOWI_WEB_URL}/ru/restaurants/${JOWI_RESTAURANT_ID}/clients_report/export_selected_to_excel`, form, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Cookie: cookieHeader,
+        Origin: JOWI_WEB_URL,
+        Referer: `${JOWI_WEB_URL}/ru/restaurants/${JOWI_RESTAURANT_ID}/clients_report`
+      },
+      params: {
+        birthday_bills_filter: 1,
+        from_date,
+        to_date
+      },
+      responseType: 'arraybuffer'
+    })
+  } catch (error) {
+    throw new Error('Не удалась загрузка отчёта по клиентам из Jowi')
+  }
+  let data
+  try {
+    const workbook = xlsx.read(response.data, { type: 'buffer' })
+    const sheetName = workbook.SheetNames[0]
+    data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName])
+    data.splice(0, 2)
+
+    return data.map((e) => [e.__EMPTY_2, e.__EMPTY_5, e.__EMPTY_7, e.__EMPTY_8])
+  } catch (error) {
+    throw new Error('Не удалось распарсить xlsx')
+  }
+}
+
 // const syncVisitors = async function() {
 //   const pup = await signIn()
 //   if (!pup || !pup.browser || !pup.page) {
@@ -120,22 +161,6 @@ const registerUserInJowi = async function(user) {
 
 
 
-//   let response
-//   try {
-//     response = await axios.get(`${JOWI_WEB_URL}/ru/restaurants/${JOWI_RESTAURANT_ID}/clients/export_to_excel`, {
-//       headers: { Cookie: cookieHeader },
-//       responseType: 'arraybuffer'
-//     })
-//   } catch (error) {
-//     return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: 'Jowi xlsx download error' })
-//   }
-//   let data
-//   try {
-//     const workbook = xlsx.read(responseVisitors.data, { type: 'buffer' })
-//     const sheetName = workbook.SheetNames[0]
-//     data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName])
-//   } catch (error) {
-//   }
 // }
 
 function universal_decode(rawStr) {
@@ -244,6 +269,7 @@ const syncVisitor = async function(user) {
 
 module.exports = {
   registerUserInJowi,
+  getJowiClientReport,
   searchUserInJowiByPhone,
   syncVisitor
 }

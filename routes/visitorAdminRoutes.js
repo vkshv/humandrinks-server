@@ -15,5 +15,6 @@ router.put('/:id', authAdminMiddleware, upload.any(), visitorAdminController.upd
 router.delete('/:id', authAdminMiddleware, visitorAdminController.deleteVisitorItem)
 router.post('/send-messages', authAdminMiddleware, visitorAdminController.sendMessage)
 router.post('/send-photos', authAdminMiddleware, upload.any(), visitorAdminController.sendPhoto)
+router.get('/report', authAdminMiddleware, visitorAdminController.getReport)
 
 module.exports = router

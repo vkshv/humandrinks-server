@@ -4,6 +4,7 @@ const http = require('../services/http/strapiClient')
 const axios = require('axios')
 const { STATUS_CODE, STATUS_TEXT } = require('../const/http')
 const { BOT_TOKEN } = require('../config/config')
+const { getJowiClientReport } = require('../services/jowi')
 
 exports.getVisitorItems = async (req, res) => {
   try {
@@ -121,4 +122,16 @@ exports.sendPhoto = async (req, res) => {
     fullSuccess: unsuccessfulChatIds.length === 0,
     unsuccessfulChatIds
   })
+}
+
+exports.getReport = async (req, res) => {
+  const from_date = req.query.from_date
+  const to_date = req.query.to_date
+
+  try {
+    const data = await getJowiClientReport(from_date, to_date)
+    return res.json({ data })
+  } catch (error) {
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error.message })
+  }
 }
