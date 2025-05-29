@@ -13,6 +13,7 @@ const { registerUserInJowi, searchUserInJowiByPhone, syncVisitor } = require('..
 exports.authenticateUser = async (req, res) => {
   try {
     const initData = req.body.initData
+    console.log(initData)
     const utm_source = req.body.utm_source
     if (!initData || !verifyTelegramAuth(initData)) {
       return res.status(STATUS_CODE.BAD_REQUEST).json({ message: STATUS_TEXT[STATUS_CODE.BAD_REQUEST] })
