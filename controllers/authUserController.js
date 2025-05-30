@@ -20,11 +20,11 @@ exports.authenticateUser = async (req, res) => {
     }
     const params = new URLSearchParams(initData)
     const user = JSON.parse(params.get('user'))
-    const response = await http.get(`/visitors?filters[telegramId]=${user.id}`)
-    if (response.data.data.length) {
+    try {
+      const response = await http.get(`/visitors/extended-data?telegramId=${user.id}`)
       if (utm_source) await http.post('/utm/increment', { source: `AUTH_${utm_source}` })
 
-      const userRegData = response.data.data[0]
+      const userRegData = response.data
       const token = jwt.sign({
         id: user.id,
         documentId: userRegData.documentId,
@@ -45,9 +45,10 @@ exports.authenticateUser = async (req, res) => {
         cardNumber: userRegData.cardNumber,
         referralProgram: userRegData.referralProgram,
         referralCode,
+        referralsCount: userRegData.referralsCount,
         ...(userRegData.isAdmin ? { isAdmin: true } : {})
       })
-    } else {
+    } catch (error) {
       return res.status(STATUS_CODE.UNAUTHORIZED).json({ message: STATUS_TEXT[STATUS_CODE.UNAUTHORIZED] })
     }
   } catch (error) {
@@ -63,8 +64,8 @@ exports.getUser = async (req, res) => {
     }
     const params = new URLSearchParams(initData)
     const user = JSON.parse(params.get('user'))
-    const response = await http.get(`/visitors?filters[telegramId]=${user.id}`)
-    if (response.data.data.length) {
+    try {
+      const response = await http.get(`/visitors/extended-data?telegramId=${user.id}`)
       const userRegData = response.data.data[0]
       const program_slug = 'default' // Возможно будут другие реферальные программы
       const referralCode = encodeBase64ForUrl(`${user.id} ${program_slug}`, BASE64_FOR_URL_SALT)
@@ -79,9 +80,10 @@ exports.getUser = async (req, res) => {
         cardNumber: userRegData.cardNumber,
         referralProgram: userRegData.referralProgram,
         referralCode,
+        referralsCount: userRegData.referralsCount,
         ...(userRegData.isAdmin ? { isAdmin: true } : {})
       })
-    } else {
+    } catch (error) {
       return res.status(STATUS_CODE.UNAUTHORIZED).json({ message: STATUS_TEXT[STATUS_CODE.UNAUTHORIZED] })
     }
   } catch (error) {
