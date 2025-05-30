@@ -13,7 +13,7 @@ const { registerUserInJowi, searchUserInJowiByPhone, syncVisitor } = require('..
 exports.authenticateUser = async (req, res) => {
   try {
     const initData = req.body.initData
-    console.log(initData)
+    // console.log(initData)
     const utm_source = req.body.utm_source
     if (!initData || !verifyTelegramAuth(initData)) {
       return res.status(STATUS_CODE.BAD_REQUEST).json({ message: STATUS_TEXT[STATUS_CODE.BAD_REQUEST] })
@@ -46,6 +46,7 @@ exports.authenticateUser = async (req, res) => {
         referralProgram: userRegData.referralProgram,
         referralCode,
         referralsCount: userRegData.referralsCount,
+        createdAt: userRegData.createdAt,
         ...(userRegData.isAdmin ? { isAdmin: true } : {})
       })
     } catch (error) {
@@ -81,6 +82,7 @@ exports.getUser = async (req, res) => {
         referralProgram: userRegData.referralProgram,
         referralCode,
         referralsCount: userRegData.referralsCount,
+        createdAt: userRegData.createdAt,
         ...(userRegData.isAdmin ? { isAdmin: true } : {})
       })
     } catch (error) {
