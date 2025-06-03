@@ -4,7 +4,7 @@ const http = require('../services/http/strapiClient')
 const axios = require('axios')
 const { STATUS_CODE, STATUS_TEXT } = require('../const/http')
 const { BOT_TOKEN } = require('../config/config')
-const { getJowiClientReport } = require('../services/jowi')
+const { getJowiClientReport, addUserBonusInJowi } = require('../services/jowi')
 
 exports.getVisitorItems = async (req, res) => {
   try {
@@ -135,3 +135,8 @@ exports.getReport = async (req, res) => {
     return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: error.message })
   }
 }
+
+// exports.addUserBonusInJowi = async (req, res) => {
+//   await addUserBonusInJowi(req.body, req.body.amount)
+//   return res.json({})
+// }

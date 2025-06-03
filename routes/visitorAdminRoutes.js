@@ -16,5 +16,6 @@ router.delete('/:id', authAdminMiddleware, visitorAdminController.deleteVisitorI
 router.post('/send-messages', authAdminMiddleware, visitorAdminController.sendMessage)
 router.post('/send-photos', authAdminMiddleware, upload.any(), visitorAdminController.sendPhoto)
 router.get('/report', authAdminMiddleware, visitorAdminController.getReport)
+// router.post('/add-user-bonus-in-jowi', authAdminMiddleware, visitorAdminController.addUserBonusInJowi)
 
 module.exports = router

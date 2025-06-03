@@ -1,6 +1,6 @@
 const { STATUS_CODE, STATUS_TEXT } = require('../const/http')
 const http = require('../services/http/strapiClient')
-// const {  } = require('../services/jowi')
+const { addUserBonusInJowi } = require('../services/jowi')
 
 exports.activateReferralProgram = async (req, res) => {
   const isAdmin = req.user?.isAdmin
@@ -53,6 +53,8 @@ exports.activateReferralProgram = async (req, res) => {
       }
     }
     await http.put(`/visitors/${referrerUser.documentId}`, referrer_data)
+
+    addUserBonusInJowi(referrerUser, referralProgram.referrer_bonus_value) // not await call
 
     return res.json({})
   } catch (error) {

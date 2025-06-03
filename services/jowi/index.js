@@ -267,9 +267,99 @@ const syncVisitor = async function(user) {
   }
 }
 
+const addUserBonusInJowi = async function(user, amount, description = '') {
+  const cookieHeader = BrowserManager.getCookieHeader()
+  const csrfToken = BrowserManager.getCsrfToken()
+
+  let searchUsersResult = null
+  try {
+    searchUsersResult = await searchUserInJowiByPhone(user.phone.slice(-10))
+    if (!searchUsersResult) {
+      throw true
+    }
+    if (searchUsersResult.length === 0) {
+      await sendJowiAlert(`При начислении ${amount} бонусов не обнаружено пользователя с таким телефоном
+        ${formatUser(user)}
+        ERR212`)
+      return
+    }
+    if (searchUsersResult.length > 1) {
+      await sendJowiAlert(`При начислении ${amount} бонусов обнаружено более одного пользователя с таким телефоном
+        ${formatUser(user)}
+        WARN213`)
+    }
+  } catch (error) {
+    await sendJowiAlert(`При начислении ${amount} бонусов произошла ошибка поиска пользователя
+      ${formatUser(user)}
+      ERR211`)
+    return
+  }
+
+  let getUserResponse = null
+  try {
+    getUserResponse = await axios.get(`${JOWI_WEB_URL}/ru/restaurants/${JOWI_RESTAURANT_ID}/clients/${searchUsersResult[0].id}`, {
+      params: {
+        format: 'js'
+      },
+      headers: {
+        'X-CSRF-Token': csrfToken,
+        Cookie: cookieHeader,
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+  } catch (error) {
+    await sendJowiAlert(`При начислении ${amount} бонусов произошла ошибка получения данных пользователя
+      ${formatUser(user)}
+      ERR215`)
+    return
+  }
+
+  let client_card_id = ''
+  const client_card_match = getUserResponse.data.match(/client_card_id=([0-9a-fA-F\-]{36})/)
+  if (client_card_match) {
+    client_card_id = client_card_match[1]
+  } else {
+    await sendJowiAlert(`При начислении ${amount} бонусов произошла ошибка парсинга данных пользователя
+      ${formatUser(user)}
+      ERR216`)
+    return
+  }
+
+  const form = new FormData()
+
+  form.append('utf8', '✓')
+  form.append('authenticity_token', csrfToken)
+  form.append('deposit[amount]', amount)
+  form.append('description', description)
+  form.append('create', 'create')
+
+  try {
+    const response = await axios.post(`${JOWI_WEB_URL}/ru/restaurants/${JOWI_RESTAURANT_ID}/client_deposits`, form, {
+      params: {
+        client_card_id,
+        client_id: searchUsersResult[0].id,
+        type: 'add'
+      },
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'X-CSRF-Token': csrfToken,
+        Cookie: cookieHeader,
+        Origin: JOWI_WEB_URL,
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+  } catch (error) {
+    await sendJowiAlert(`При начислении ${amount} бонусов произошла ошибка пополнения депозита в Jowi
+      ${formatUser(user)}
+      ERR217`)
+    return
+  }
+}
+
 module.exports = {
   registerUserInJowi,
   getJowiClientReport,
   searchUserInJowiByPhone,
-  syncVisitor
+  syncVisitor,
+  addUserBonusInJowi
 }
