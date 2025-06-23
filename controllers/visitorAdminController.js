@@ -45,14 +45,14 @@ exports.deleteVisitorItem = async (req, res) => {
 }
 
 exports.sendMessage = async (req, res) => {
-  const unsuccessfulChatIds = []
-
-  const chatIds = req.body.chatIds
-  const text = req.body.text
-  const reply_markup = req.body.reply_markup
-  if (!Array.isArray(chatIds) || !text) {
+  if (!Array.isArray(req.body.chatIds) || !req.body.text) {
     return res.status(STATUS_CODE.BAD_REQUEST).json({ message: STATUS_TEXT[STATUS_CODE.BAD_REQUEST] })
   }
+
+  const chatIds = req.body.chatIds.slice(0, 50)
+  const text = req.body.text
+  const reply_markup = req.body.reply_markup
+  const unsuccessfulChatIds = req.body.chatIds.slice(50)
 
   const sendToChat = async (chatId) => {
     try {
@@ -66,7 +66,7 @@ exports.sendMessage = async (req, res) => {
     }
   }
 
-  const batchSize = 50
+  const batchSize = 25
   for (let i = 0; i < chatIds.length; i += batchSize) {
     const batch = chatIds.slice(i, i + batchSize)
     await Promise.all(batch.map(sendToChat))
@@ -80,7 +80,6 @@ exports.sendMessage = async (req, res) => {
 }
 
 exports.sendPhoto = async (req, res) => {
-  const unsuccessfulChatIds = []
   let bodyData = null
 
   try {
@@ -93,6 +92,8 @@ exports.sendPhoto = async (req, res) => {
     return res.status(STATUS_CODE.BAD_REQUEST).json({ message: STATUS_TEXT[STATUS_CODE.BAD_REQUEST] })
   }
 
+  const unsuccessfulChatIds = bodyData.chatIds.slice(50)
+  const chatIds = bodyData.chatIds.slice(0, 50)
 
   const sendToChat = async (chatId) => {
     const form = new FormData()
@@ -111,9 +112,9 @@ exports.sendPhoto = async (req, res) => {
     }
   }
 
-  const batchSize = 50
-  for (let i = 0; i < bodyData.chatIds.length; i += batchSize) {
-    const batch = bodyData.chatIds.slice(i, i + batchSize)
+  const batchSize = 25
+  for (let i = 0; i < chatIds.length; i += batchSize) {
+    const batch = chatIds.slice(i, i + batchSize)
     await Promise.all(batch.map(sendToChat))
     await new Promise(resolve => setTimeout(resolve, 25))
   }
