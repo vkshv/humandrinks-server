@@ -15,5 +15,6 @@ router.post('/redeem-promocode', authUserMiddleware, authUserController.redeemPr
 router.post('/get-user', authUserMiddleware, authUserController.getUser)
 router.post('/sync-visitor', authUserMiddleware, authUserController.syncVisitor)
 router.get('/get-referral-program', authUserMiddleware, authUserController.getReferralProgram)
+router.post('/consent-personal-data', authUserMiddleware, authUserController.consentPersonalData)
 
 module.exports = router

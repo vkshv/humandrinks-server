@@ -47,6 +47,7 @@ exports.authenticateUser = async (req, res) => {
         referralCode,
         referralsCount: userRegData.referralsCount,
         createdAt: userRegData.createdAt,
+        isPersonalDataConsented: userRegData.isPersonalDataConsented,
         ...(userRegData.isAdmin ? { isAdmin: true } : {})
       })
     } catch (error) {
@@ -83,6 +84,7 @@ exports.getUser = async (req, res) => {
         referralCode,
         referralsCount: userRegData.referralsCount,
         createdAt: userRegData.createdAt,
+        isPersonalDataConsented: userRegData.isPersonalDataConsented,
         ...(userRegData.isAdmin ? { isAdmin: true } : {})
       })
     } catch (error) {
@@ -221,7 +223,18 @@ exports.registerUser = async (req, res) => {
   const promocode = req.body.promocode
   const utm_source = req.body.utm_source
   const referral_code = req.body.referral_code
-  const data = { name, surname, patronymic, address, phone, birth, telegramId, utm_source, bonus: 0 }
+  const data = {
+    name,
+    surname,
+    patronymic,
+    address,
+    phone,
+    birth,
+    telegramId,
+    utm_source,
+    bonus: 0,
+    isPersonalDataConsented: true
+  }
 
   if (promocode) {
     try {
@@ -260,6 +273,20 @@ exports.registerUser = async (req, res) => {
       }
     })
 
+    return res.json({})
+  } catch (error) {
+    return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: STATUS_TEXT[STATUS_CODE.INTERNAL_SERVER_ERROR] })
+  }
+}
+
+exports.consentPersonalData = async (req, res) => {
+  const documentId = req.user.documentId
+  try {
+    await http.put(`/visitors/${documentId}`, {
+      data: {
+        isPersonalDataConsented: true
+      }
+    })
     return res.json({})
   } catch (error) {
     return res.status(STATUS_CODE.INTERNAL_SERVER_ERROR).json({ message: STATUS_TEXT[STATUS_CODE.INTERNAL_SERVER_ERROR] })
