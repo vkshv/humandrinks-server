@@ -233,7 +233,7 @@ exports.registerUser = async (req, res) => {
     telegramId,
     utm_source,
     bonus: 0,
-    isPersonalDataConsented: true
+    isPersonalDataConsented: false
   }
 
   if (promocode) {
