@@ -1,7 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 require('dotenv').config()
-const BrowserManager = require('./services/http/browserManager')
+// const BrowserManager = require('./services/http/browserManager')
 
 const { STATUS_CODE, STATUS_TEXT } = require('./const/http')
 
@@ -18,9 +18,9 @@ app.use('/api/admin/visitor', require('./routes/visitorAdminRoutes'))
 app.use('/api/admin/whats-new', require('./routes/whatsNewAdminRoutes'))
 app.use('/api/admin/utm', require('./routes/utmAdminRoutes'))
 
-app.use('/api/auth', require('./routes/authUserRoutes'))
+// app.use('/api/auth', require('./routes/authUserRoutes'))
 app.use('/api/content', require('./routes/contentUserRoutes'))
-app.use('/api/agent', require('./routes/agentRoutes'))
+// app.use('/api/agent', require('./routes/agentRoutes'))
 
 app.use((req, res) => {
   res.status(STATUS_CODE.NOT_FOUND).json({ message: STATUS_TEXT[STATUS_CODE.NOT_FOUND] })
@@ -29,5 +29,5 @@ app.use((req, res) => {
 const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`)
-  BrowserManager.signInJowi()
+  // BrowserManager.signInJowi()
 })
