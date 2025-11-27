@@ -12,6 +12,7 @@ exports.getFoodItems = async (req, res) => {
       return {
         ...data,
         picture: picture?.url,
+        pictureExtended: picture,
         category: category?.name,
         subcategory: food_subcategory?.name ?? null
       }
@@ -38,6 +39,7 @@ exports.getDrinkItems = async (req, res) => {
       return {
         ...data,
         picture: picture?.url,
+        pictureExtended: picture,
         category: category?.name,
         subcategory: drink_subcategory?.name ?? null
       }
@@ -64,6 +66,7 @@ exports.getEventItems = async (req, res) => {
       return {
         ...data,
         picture: picture?.url,
+        pictureExtended: picture,
         category: category?.name
       }
     }))
@@ -88,7 +91,8 @@ exports.getMerchItems = async (req, res) => {
       const { createdAt, updatedAt, publishedAt, picture, ...data } = e
       return {
         ...data,
-        picture: picture?.url
+        picture: picture?.url,
+        pictureExtended: picture
       }
     }))
   } catch (error) {
